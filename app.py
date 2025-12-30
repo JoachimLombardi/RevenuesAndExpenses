@@ -219,34 +219,80 @@ def fill_excel_file(list_revenues_dict, list_expenses_dict):
         }
         rows_expenses.append(row_exp)
     rows_expenses = sorted(rows_expenses, key=lambda x: x["Date_dt"] or datetime.min)
+    # Sum revenues subtotal
     columns_revenues = list(rows_revenues[0].keys())
     empty_row_revenues = {col: "" for col in columns_revenues}
+    sum_rev_ht = sum(row.get("HT", 0) or 0 for row in rows_revenues)
+    sum_rev_vat_5_5 = sum(row.get("TVA 5.5%", 0) or 0 for row in rows_revenues)
+    sum_rev_vat_10 = sum(row.get("TVA 10%", 0) or 0 for row in rows_revenues)
+    sum_rev_vat_20 = sum(row.get("TVA 20%", 0) or 0 for row in rows_revenues)
+    sum_rev_ttc = sum(row.get("TTC", 0) or 0 for row in rows_revenues)
     rows_revenues.append(empty_row_revenues)
     row_rev_sum = {
         "N° FACTURE": "",
         "Date": "",
         "Date_dt": "",
-        "Nom du client": "TOTAL",
-        "HT": sum(row.get("HT", 0) or 0 for row in rows_revenues),
-        "TVA 5.5%": sum(row.get("TVA 5.5%", 0) or 0 for row in rows_revenues),
-        "TVA 10%": sum(row.get("TVA 10%", 0) or 0 for row in rows_revenues),
-        "TVA 20%": sum(row.get("TVA 20%", 0) or 0 for row in rows_revenues),
-        "TTC": sum(row.get("TTC", 0) or 0 for row in rows_revenues),
+        "Nom du client": "SOUS TOTAL",
+        "HT": sum_rev_ht,
+        "TVA 5.5%": sum_rev_vat_5_5,
+        "TVA 10%": sum_rev_vat_10,
+        "TVA 20%": sum_rev_vat_20,
+        "TTC": sum_rev_ttc,
     }
-    rows_revenues.append(row_rev_sum)
+    rows_revenues.append(row_rev_sum)    
+    rows_revenues.append(empty_row_revenues)
+    # Sum revenues total
+    row_rev_sum_ht = {col: "" for col in columns_revenues}
+    row_rev_sum_ht["N° FACTURE"] = "TOTAL HT"
+    row_rev_sum_ht["Date"] = sum_rev_ht
+    rows_revenues.append(row_rev_sum_ht)
+    row_rev_sum_vat = {col: "" for col in columns_revenues}
+    row_rev_sum_vat["N° FACTURE"] = "TOTAL TVA"
+    row_rev_sum_vat["Date"] = sum_rev_vat_5_5 + sum_rev_vat_10 + sum_rev_vat_20
+    rows_revenues.append(row_rev_sum_vat)
+    row_rev_sum_ttc = {col: "" for col in columns_revenues}
+    row_rev_sum_ttc["N° FACTURE"] = "TOTAL TTC"
+    row_rev_sum_ttc["Date"] = sum_rev_ttc
+    rows_revenues.append(row_rev_sum_ttc)
+    # Sum expenses subtotal
     columns_expenses = list(rows_expenses[0].keys())
     empty_row_expenses = {col: "" for col in columns_expenses}
+    sum_exp_ht = sum(row.get("HT", 0) or 0 for row in rows_expenses)
+    sum_exp_vat_5_5 = sum(row.get("TVA 5.5%", 0) or 0 for row in rows_expenses)
+    sum_exp_vat_10 = sum(row.get("TVA 10%", 0) or 0 for row in rows_expenses)
+    sum_exp_vat_20 = sum(row.get("TVA 20%", 0) or 0 for row in rows_expenses)
+    sum_exp_ttc = sum(row.get("TTC", 0) or 0 for row in rows_expenses)
     rows_expenses.append(empty_row_expenses)
     row_exp_sum = {
-        "Date": "TOTAL",
+        "Date": "SOUS TOTAL",
         "Date_dt": "",
-        "HT": sum(row.get("HT", 0) or 0 for row in rows_expenses),
-        "TVA 5.5%": sum(row.get("TVA 5.5%", 0) or 0 for row in rows_expenses),
-        "TVA 10%": sum(row.get("TVA 10%", 0) or 0 for row in rows_expenses),
-        "TVA 20%": sum(row.get("TVA 20%", 0) or 0 for row in rows_expenses),
-        "TTC": sum(row.get("TTC", 0) or 0 for row in rows_expenses),
+        "HT": sum_exp_ht,
+        "TVA 5.5%": sum_exp_vat_5_5,
+        "TVA 10%": sum_exp_vat_10,
+        "TVA 20%": sum_exp_vat_20,
+        "TTC": sum_exp_ttc,
     }
     rows_expenses.append(row_exp_sum)
+    rows_expenses.append(empty_row_expenses)
+    # Sum expenses total
+    row_exp_sum_ht = {col: "" for col in columns_expenses}
+    row_exp_sum_ht["Date"] = "TOTAL HT"
+    row_exp_sum_ht["HT"] = sum_exp_ht
+    rows_expenses.append(row_exp_sum_ht)
+    row_exp_sum_vat = {col: "" for col in columns_expenses}
+    row_exp_sum_vat["Date"] = "TOTAL TVA"
+    row_exp_sum_vat["HT"] = sum_exp_vat_5_5 + sum_exp_vat_10 + sum_exp_vat_20
+    rows_expenses.append(row_exp_sum_vat)
+    row_exp_sum_ttc = {col: "" for col in columns_expenses}
+    row_exp_sum_ttc["Date"] = "TOTAL TTC"
+    row_exp_sum_ttc["HT"] = sum_exp_ttc
+    rows_expenses.append(row_exp_sum_ttc)
+    rows_expenses.append(empty_row_expenses)
+    # VAT to pay
+    row_vat_to_pay = {col: "" for col in columns_expenses}
+    row_vat_to_pay["Date"] = "TVA à payer"
+    row_vat_to_pay["HT"] = row_rev_sum_vat["Date"] - row_exp_sum_vat["HT"]
+    rows_expenses.append(row_vat_to_pay)
     # Convert to DataFrame
     df_revenues = pd.DataFrame(rows_revenues)
     df_revenues = df_revenues.drop(columns=["Date_dt"])
