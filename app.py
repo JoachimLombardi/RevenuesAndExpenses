@@ -225,7 +225,8 @@ def fill_excel_file(list_revenues_dict, list_expenses_dict):
     row_rev_sum = {
         "N° FACTURE": "",
         "Date": "",
-        "Nom du client": "",
+        "Date_dt": "",
+        "Nom du client": "TOTAL",
         "HT": sum(row.get("HT", 0) or 0 for row in rows_revenues),
         "TVA 5.5%": sum(row.get("TVA 5.5%", 0) or 0 for row in rows_revenues),
         "TVA 10%": sum(row.get("TVA 10%", 0) or 0 for row in rows_revenues),
@@ -237,6 +238,8 @@ def fill_excel_file(list_revenues_dict, list_expenses_dict):
     empty_row_expenses = {col: "" for col in columns_expenses}
     rows_expenses.append(empty_row_expenses)
     row_exp_sum = {
+        "Date": "",
+        "Date_dt": "TOTAL",
         "HT": sum(row.get("HT", 0) or 0 for row in rows_expenses),
         "TVA 5.5%": sum(row.get("TVA 5.5%", 0) or 0 for row in rows_expenses),
         "TVA 10%": sum(row.get("TVA 10%", 0) or 0 for row in rows_expenses),
