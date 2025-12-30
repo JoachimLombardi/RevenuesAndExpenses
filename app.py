@@ -436,14 +436,6 @@ if st.button("Lancer le traitement"):
     else:
         list_revenues_dict = call_llm(revenues, tools_revenues)
         list_expenses_dict = call_llm(expenses, tools_expenses)
-        # with open("list_revenues_dict.json", "w") as f:
-        #     json.dump(list_revenues_dict, f)
-        # with open("list_expenses_dict.json", "w") as f:
-        #     json.dump(list_expenses_dict, f)
-        # with open("list_revenues_dict.json", "r") as f:
-        #     list_revenues_dict = json.load(f)
-        # with open("list_expenses_dict.json", "r") as f:
-        #     list_expenses_dict = json.load(f)
         fill_excel_file(list_revenues_dict, list_expenses_dict)
   
   
