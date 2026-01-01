@@ -140,8 +140,8 @@ def invoice_to_image(invoice):
             url= f"data:image/{mime};base64,{base64_image}"
             list_b64.append(url)
     else:
-        df = pd.read_excel(path, sheet_name=None)
-        df = next(iter(df.values()))
+        dict_ = pd.read_excel(path, sheet_name=None)
+        df = next(iter(dict_.values()))
         with tempfile.NamedTemporaryFile(suffix=".jpeg", delete=False) as img_tmp:
             dfi.export(df, img_tmp.name, table_conversion="pillow")
             with open(img_tmp.name, "rb") as f:
